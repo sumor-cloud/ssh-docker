@@ -21,11 +21,18 @@ describe('main', () => {
       dockerId = `${imageName}_${version}_${port}`
       remoteFolder = `/tmp/sumor-ssh-docker-test/${dockerId}`
       await ssh.file.remove(remoteFolder)
+
+      // clean up the image before testing
+      const imageExists = await ssh.docker.imageExists(imageName, version)
+      if (imageExists) {
+        await ssh.docker.removeImage(imageName, version)
+      }
+
       await ssh.disconnect()
     },
     10 * 60 * 1000
   )
-  it('test connect', async () => {
+  it('Test Connect', async () => {
     const ssh = new SSH(server)
     await ssh.connect()
 
@@ -45,21 +52,10 @@ describe('main', () => {
       const ssh = new SSH(server)
       await ssh.connect()
       try {
-        // clean up the image before testing
-        const imageExists = await ssh.docker.imageExists(imageName, version)
-        if (imageExists) {
-          await ssh.docker.removeImage(imageName, version)
-        }
-
         await ssh.docker.buildImage(sourceFolder, imageName, version)
+        const imageExists = await ssh.docker.imageExists(imageName, version)
+        expect(imageExists).toBeTruthy()
 
-        const imageExists1 = await ssh.docker.imageExists(imageName, version)
-        expect(imageExists1).toBeTruthy()
-
-        await ssh.docker.removeImage(imageName, version)
-
-        const imageExists2 = await ssh.docker.imageExists(imageName, version)
-        expect(imageExists2).toBeFalsy()
         await ssh.disconnect()
       } catch (e) {
         await ssh.disconnect()
@@ -106,11 +102,6 @@ describe('main', () => {
         await ssh.file.ensureDir(remoteFolder)
         await ssh.file.putFolder(configFolder, remoteFolder)
 
-        const imageExists = await ssh.docker.imageExists(imageName, version)
-        if (!imageExists) {
-          await ssh.docker.buildImage(sourceFolder, imageName, version)
-        }
-
         await ssh.docker.run({
           name: dockerId,
           image: imageName,
@@ -133,6 +124,25 @@ describe('main', () => {
 
         configData = JSON.parse(configData)
         expect(configData.title).toBe('DEMO')
+        await ssh.disconnect()
+      } catch (e) {
+        await ssh.disconnect()
+        throw e
+      }
+    },
+    60 * 1000
+  )
+  it(
+    'Delete Image',
+    async () => {
+      const ssh = new SSH(server)
+      await ssh.connect()
+      try {
+        await ssh.docker.removeImage(imageName, version)
+        await ssh.docker.removeImage(imageName, version) // Just for testing docker remove image error handling
+
+        const imageExists = await ssh.docker.imageExists(imageName, version)
+        expect(imageExists).toBeFalsy()
         await ssh.disconnect()
       } catch (e) {
         await ssh.disconnect()
