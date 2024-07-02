@@ -50,3 +50,53 @@ class SSH extends SSHBasic {
 
 export default SSH
 ```
+
+### Use tool
+
+```js
+import SSH from './ssh.js'
+
+const ssh = new SSH(server)
+
+await ssh.connect()
+
+// docker build image
+const sourceFolder = '/path/to/source/folder'
+const imageName = 'image-name'
+const version = '1.0.0'
+await ssh.docker.buildImage(sourceFolder, imageName, version)
+
+// images list
+const images = await ssh.docker.images()
+
+// exists image
+const exists = await ssh.docker.existsImage(imageName, version)
+
+// docker run container
+await ssh.docker.run({
+  name: 'container-name',
+  image: imageName,
+  version: version,
+  ports: [{ from: 443, to: 30000 }],
+  folders: {
+    config: '/path/to/config/folder'
+  }
+})
+
+// docker containers list
+const containers = await ssh.docker.containers()
+
+// exists container
+const exists = await ssh.docker.exists('container-name')
+
+// exec command in container
+const result = await ssh.docker.exec('container-name', 'ls -al')
+
+// docker delete container
+await ssh.docker.remove('container-name')
+
+// docker delete image
+await ssh.docker.removeImage(imageName, version)
+
+await ssh.disconnect()
+```

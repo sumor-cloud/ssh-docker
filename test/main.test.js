@@ -23,8 +23,8 @@ describe('main', () => {
       await ssh.file.remove(remoteFolder)
 
       // clean up the image before testing
-      const imageExists = await ssh.docker.imageExists(imageName, version)
-      if (imageExists) {
+      const existsImage = await ssh.docker.existsImage(imageName, version)
+      if (existsImage) {
         await ssh.docker.removeImage(imageName, version)
       }
 
@@ -53,8 +53,8 @@ describe('main', () => {
       await ssh.connect()
       try {
         await ssh.docker.buildImage(sourceFolder, imageName, version)
-        const imageExists = await ssh.docker.imageExists(imageName, version)
-        expect(imageExists).toBeTruthy()
+        const existsImage = await ssh.docker.existsImage(imageName, version)
+        expect(existsImage).toBeTruthy()
 
         await ssh.disconnect()
       } catch (e) {
@@ -141,8 +141,8 @@ describe('main', () => {
         await ssh.docker.removeImage(imageName, version)
         await ssh.docker.removeImage(imageName, version) // Just for testing docker remove image error handling
 
-        const imageExists = await ssh.docker.imageExists(imageName, version)
-        expect(imageExists).toBeFalsy()
+        const existsImage = await ssh.docker.existsImage(imageName, version)
+        expect(existsImage).toBeFalsy()
         await ssh.disconnect()
       } catch (e) {
         await ssh.disconnect()
