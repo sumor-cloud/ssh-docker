@@ -30,7 +30,7 @@ describe('main', () => {
 
       await ssh.disconnect()
     },
-    10 * 60 * 1000
+    5 * 60 * 1000
   )
   it('Test Connect', async () => {
     const ssh = new SSH(server)
@@ -62,7 +62,7 @@ describe('main', () => {
         throw e
       }
     },
-    60 * 1000
+    5 * 60 * 1000
   )
   it('stringify run command', () => {
     let error
@@ -130,7 +130,7 @@ describe('main', () => {
         throw e
       }
     },
-    60 * 1000
+    5 * 60 * 1000
   )
   it(
     'Delete Image',
@@ -149,6 +149,6 @@ describe('main', () => {
         throw e
       }
     },
-    60 * 1000
+    5 * 60 * 1000
   )
 })
