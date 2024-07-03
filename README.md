@@ -107,5 +107,13 @@ await ssh.docker.remove('container-name')
 // docker delete image
 await ssh.docker.removeImage(imageName, version)
 
+// build node.js project
+const logs = await ssh.docker.buildNode('/path/to/source')
+
+// run node.js project
+const logs = await ssh.docker.runNode('container-name', '/path/to/source', {
+  port
+})
+
 await ssh.disconnect()
 ```
