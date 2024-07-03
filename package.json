@@ -1,7 +1,7 @@
 {
   "name": "@sumor/ssh-docker",
   "description": "ssh-docker is a docker tool for @sumor/ssh-tools",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "license": "MIT",
   "repository": "sumor-cloud/ssh-docker",
   "author": "Sumor Cloud Ltd",
