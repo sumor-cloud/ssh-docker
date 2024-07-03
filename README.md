@@ -77,10 +77,19 @@ await ssh.docker.run({
   name: 'container-name',
   image: imageName,
   version: version,
-  ports: [{ from: 443, to: 30000 }],
-  folders: {
-    config: '/path/to/config/folder'
-  }
+  ports: [
+    {
+      from: 443, // container port
+      to: 30123 // host port
+    }
+  ],
+  folders: [
+    {
+      from: '/usr/source/config', // container folder
+      to: '/path/to/config/folder', // host folder
+      readOnly: true // optional, default is false
+    }
+  ]
 })
 
 // docker containers list

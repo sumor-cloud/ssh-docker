@@ -2,10 +2,9 @@ export default options => {
   const { image, version, ports, folders, name } = options || {}
   const dockerRunStr = ['docker run -itd --restart=on-failure']
   if (folders) {
-    for (const folder in folders) {
-      const path = folders[folder]
-      const instancePath = `/usr/source/${folder}`
-      dockerRunStr.push(`-v ${path}:${instancePath}:ro`)
+    for (const folder of folders) {
+      const readOnly = folder.readOnly ? ':ro' : ''
+      dockerRunStr.push(`-v ${folder.to}:${folder.from}${readOnly}`)
     }
   }
   if (ports) {

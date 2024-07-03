@@ -83,14 +83,23 @@ describe('main', () => {
     const cmd2 = stringifyRunCmd({
       image: 'test',
       version: '1.0.0',
-      ports: [{ from: 443, to: 443 }],
-      folders: {
-        config: '/usr/source/config'
-      },
+      ports: [{ from: 443, to: 30123 }],
+      folders: [
+        {
+          from: '/usr/source/config',
+          to: '/usr/demo/config',
+          readOnly: true
+        },
+        {
+          from: '/usr/source/logs',
+          to: '/usr/demo/logs',
+          readOnly: true
+        }
+      ],
       name: 'test'
     })
     expect(cmd2).toStrictEqual(
-      'docker run -itd --restart=on-failure -v /usr/source/config:/usr/source/config:ro -p 443:443 --name test -d test:1.0.0'
+      'docker run -itd --restart=on-failure -v /usr/demo/config:/usr/source/config:ro -v /usr/demo/logs:/usr/source/logs:ro -p 30123:443 --name test -d test:1.0.0'
     )
   })
   it(
@@ -107,9 +116,13 @@ describe('main', () => {
           image: imageName,
           version,
           ports: [{ from: 443, to: port }],
-          folders: {
-            config: remoteFolder
-          }
+          folders: [
+            {
+              from: '/usr/source/config',
+              to: remoteFolder,
+              readOnly: true
+            }
+          ]
         })
 
         const exists = await ssh.docker.exists(dockerId)
