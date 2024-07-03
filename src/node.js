@@ -50,6 +50,33 @@ export default (ssh, docker) => {
       ],
       cmd: 'cd /usr/source && npm start'
     })
+
+    let retry = 0
+    const maxRetry = 60 * 10 // 60 seconds
+
+    const ping = async () => {
+      let pingError
+      try {
+        await ssh.exec(`curl --insecure https://localhost:${port}`, {
+          cwd: '/'
+        })
+      } catch (e) {
+        pingError = e
+      }
+      if (pingError) {
+        if (retry < maxRetry) {
+          retry++
+          await new Promise(resolve => {
+            setTimeout(resolve, 100)
+          })
+          await ping()
+        } else {
+          throw pingError
+        }
+      }
+    }
+
+    await ping()
   }
 
   docker.buildNode = build

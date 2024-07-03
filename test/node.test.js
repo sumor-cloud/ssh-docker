@@ -81,9 +81,6 @@ describe('Node.JS related', () => {
         let response
         let pingError
         try {
-          await new Promise(resolve => {
-            setTimeout(resolve, 10 * 1000)
-          })
           response = await ssh.exec(`curl --insecure https://localhost:${port}`, {
             cwd: '/'
           })
