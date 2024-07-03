@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll } from '@jest/globals'
+import { describe, expect, it, beforeAll, afterAll } from '@jest/globals'
 import SSH from './SSH.js'
 import server from './server.js'
 import stringifyRunCmd from '../src/stringifyRunCmd.js'
@@ -20,18 +20,23 @@ describe('main', () => {
       imageName = `test-ssh-docker-${port}`
       dockerId = `${imageName}_${version}_${port}`
       remoteFolder = `/tmp/sumor-ssh-docker-test/${dockerId}`
-      await ssh.file.remove(remoteFolder)
 
-      // clean up the image before testing
-      const existsImage = await ssh.docker.existsImage(imageName, version)
-      if (existsImage) {
-        await ssh.docker.removeImage(imageName, version)
-      }
+      // // clean up the image before testing
+      // const existsImage = await ssh.docker.existsImage(imageName, version)
+      // if (existsImage) {
+      //   await ssh.docker.removeImage(imageName, version)
+      // }
 
       await ssh.disconnect()
     },
     5 * 60 * 1000
   )
+  afterAll(async () => {
+    const ssh = new SSH(server)
+    await ssh.connect()
+    await ssh.file.remove(remoteFolder)
+    await ssh.disconnect()
+  })
   it('Test Connect', async () => {
     const ssh = new SSH(server)
     await ssh.connect()

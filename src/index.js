@@ -1,12 +1,16 @@
 import dockerCmd from './dockerCmd.js'
 import stringifyRunCmd from './stringifyRunCmd.js'
+import node from './node.js'
+
 export default ssh => {
   const apis = {
     async cmd(cmd, options) {
       return await dockerCmd(ssh, cmd, options)
     },
     async run(options) {
-      return await this.cmd(stringifyRunCmd(options))
+      const cmd = stringifyRunCmd(options)
+      console.log(cmd)
+      return await this.cmd(cmd)
     },
     async exists(id) {
       const containers = await this.containers()
@@ -69,6 +73,8 @@ export default ssh => {
 
   // alias
   apis.instances = apis.containers
+
+  node(ssh, apis)
 
   return apis
 }

@@ -1,6 +1,12 @@
 export default options => {
-  const { image, version, ports, folders, name } = options || {}
-  const dockerRunStr = ['docker run -itd --restart=on-failure']
+  const { image, version, ports, folders, name, cmd, background } = options || {}
+  const dockerRunStr = ['docker run']
+  if (background !== false) {
+    dockerRunStr.push('-itd')
+    dockerRunStr.push('--restart=on-failure')
+  } else {
+    dockerRunStr.push('-it')
+  }
   if (folders) {
     for (const folder of folders) {
       const readOnly = folder.readOnly ? ':ro' : ''
@@ -18,5 +24,9 @@ export default options => {
     throw new Error('Image and version are required')
   }
   dockerRunStr.push(`-d ${image}:${version}`)
+  if (cmd) {
+    const cmdString = JSON.stringify(cmd)
+    dockerRunStr.push(`sh -c ${cmdString}`)
+  }
   return dockerRunStr.join(' ')
 }
