@@ -27,13 +27,16 @@ describe('Node.JS related', () => {
     },
     5 * 60 * 1000
   )
-  afterAll(async () => {
-    const ssh = new SSH(server)
-    await ssh.connect()
-    await ssh.docker.remove(dockerId)
-    await ssh.file.remove(remoteFolder)
-    await ssh.disconnect()
-  })
+  afterAll(
+    async () => {
+      const ssh = new SSH(server)
+      await ssh.connect()
+      await ssh.docker.remove(dockerId)
+      await ssh.file.remove(remoteFolder)
+      await ssh.disconnect()
+    },
+    5 * 60 * 1000
+  )
   it(
     'build',
     async () => {

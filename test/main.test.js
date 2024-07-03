@@ -31,12 +31,15 @@ describe('main', () => {
     },
     5 * 60 * 1000
   )
-  afterAll(async () => {
-    const ssh = new SSH(server)
-    await ssh.connect()
-    await ssh.file.remove(remoteFolder)
-    await ssh.disconnect()
-  })
+  afterAll(
+    async () => {
+      const ssh = new SSH(server)
+      await ssh.connect()
+      await ssh.file.remove(remoteFolder)
+      await ssh.disconnect()
+    },
+    5 * 60 * 1000
+  )
   it('Test Connect', async () => {
     const ssh = new SSH(server)
     await ssh.connect()
