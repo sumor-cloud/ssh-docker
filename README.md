@@ -83,7 +83,7 @@ await ssh.docker.run({
       to: 30123 // host port
     }
   ],
-  folders: [
+  bindings: [
     {
       from: '/usr/source/config', // container folder
       to: '/path/to/config/folder', // host folder

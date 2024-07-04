@@ -92,7 +92,7 @@ describe('main', () => {
       image: 'test',
       version: '1.0.0',
       ports: [{ from: 443, to: 30123 }],
-      folders: [
+      bindings: [
         {
           from: '/usr/source/config',
           to: '/usr/demo/config',
@@ -124,7 +124,7 @@ describe('main', () => {
           image: imageName,
           version,
           ports: [{ from: 443, to: port }],
-          folders: [
+          bindings: [
             {
               from: '/usr/source/config',
               to: remoteFolder,

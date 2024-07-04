@@ -1,5 +1,5 @@
 export default options => {
-  const { image, version, ports, folders, name, cmd, background } = options || {}
+  const { image, version, ports, bindings, name, cmd, background } = options || {}
   const dockerRunStr = ['docker run']
   if (background !== false) {
     dockerRunStr.push('-itd')
@@ -7,8 +7,8 @@ export default options => {
   } else {
     dockerRunStr.push('-it')
   }
-  if (folders) {
-    for (const folder of folders) {
+  if (bindings) {
+    for (const folder of bindings) {
       const readOnly = folder.readOnly ? ':ro' : ''
       dockerRunStr.push(`-v ${folder.to}:${folder.from}${readOnly}`)
     }

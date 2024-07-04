@@ -24,7 +24,9 @@
     "husky": "^9.0.11",
     "jest": "^29.7.0",
     "jest-html-reporter": "^3.10.2",
-    "prettier": "^3.2.5"
+    "prettier": "^3.2.5",
+    "glob": "^10.4.2",
+    "fs-extra": "^10.0.0"
   },
   "files": [
     "src",
@@ -39,6 +41,8 @@
     "autofix": "eslint --fix . && prettier --write . && npm audit fix --force",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testMatch='**/test/**/*.test.js'",
     "test-node": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testMatch='**/test/**/node.test.js'",
+    "test-site": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testMatch='**/test/**/site.test.js'",
+    "test-nginx": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testMatch='**/test/**/nginx.test.js'",
     "coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --testMatch='**/test/**/*.test.js'",
     "push-tag": "git push && git push --tags",
     "publish-beta": "npm version prerelease --preid beta && npm run push-tag",

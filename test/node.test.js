@@ -16,7 +16,6 @@ describe('Node.JS related', () => {
       port = await ssh.port.getPort()
       dockerId = `test-ssh-docker-node-${port}`
       remoteFolder = `/tmp/sumor-ssh-docker-test/${dockerId}`
-      await ssh.file.remove(remoteFolder)
 
       // copy the source folder to the remote server
       await ssh.file.ensureDir(remoteFolder)

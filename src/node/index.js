@@ -12,7 +12,7 @@ export default (ssh, docker) => {
       name: dockerId,
       image: 'node',
       version: 'latest',
-      folders: [
+      bindings: [
         {
           from: '/usr/source',
           to: remoteFolder
@@ -42,7 +42,7 @@ export default (ssh, docker) => {
           to: port
         }
       ],
-      folders: [
+      bindings: [
         {
           from: '/usr/source',
           to: remoteFolder
