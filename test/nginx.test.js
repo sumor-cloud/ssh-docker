@@ -1,6 +1,7 @@
 import { describe, expect, it, beforeAll, afterAll } from '@jest/globals'
-import SSH from './SSH.js'
-import server from './server.js'
+import SSH from './utils/SSH.js'
+import server from './utils/server.js'
+import runNginxConfig from '../src/nginx/runNginxConfig.js'
 
 let port
 let remoteFolder
@@ -29,6 +30,12 @@ describe('Nginx related', () => {
     },
     5 * 60 * 1000
   )
+  it('format nginx config', async () => {
+    const result = runNginxConfig()
+    expect(result.name.indexOf('sumor_nginx_')).toBe(0)
+    expect(result.ports.length).toBe(1)
+    expect(result.ports[0].from).toBe(443)
+  })
   it(
     'run nginx',
     async () => {

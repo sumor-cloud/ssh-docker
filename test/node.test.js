@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeAll, afterAll } from '@jest/globals'
-import SSH from './SSH.js'
-import server from './server.js'
+import SSH from './utils/SSH.js'
+import server from './utils/server.js'
 
 const sourceFolder = `${process.cwd()}/test/assets/app`
 const configFolder = `${process.cwd()}/test/assets/config`

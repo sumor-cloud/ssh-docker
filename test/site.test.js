@@ -5,7 +5,7 @@ import stringifyHttp from '../src/site/stringifyHttp.js'
 import stringifyServer from '../src/site/stringifyServer.js'
 import stringify from '../src/site/index.js'
 
-import loadNginxFiles from './loadNginxFiles.js'
+import loadNginxFiles from './utils/loadNginxFiles.js'
 const nginxFiles = await loadNginxFiles()
 
 describe('Site related', () => {
@@ -34,13 +34,14 @@ describe('Site related', () => {
       domain: 'dev.example.com',
       servers: [
         {
-          host: 'dev.example.com',
-          port: 30001
+          host: 'dev1.example.com'
         },
         {
-          host: 'dev.example.com',
+          host: 'dev2.example.com',
           port: 30002,
-          weight: 1
+          weight: 1,
+          maxFails: 3,
+          maxConns: 5
         }
       ]
     })

@@ -16,6 +16,9 @@ app.all('/', async (req, res) => {
   })
 })
 
+// delay 1 second to simulate a slow server
+await new Promise(resolve => setTimeout(resolve, 1000))
+
 await app.listen()
 
 console.log('server running on https://localhost')

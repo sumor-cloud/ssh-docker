@@ -115,5 +115,23 @@ const logs = await ssh.docker.runNode('container-name', '/path/to/source', {
   port
 })
 
+// run Nginx
+const logs = await ssh.docker.runNginx({
+  name: 'container-name',
+  ports: [
+    {
+      from: 443, // container port
+      to: 30123 // host port
+    }
+  ],
+  bindings: [
+    {
+      from: '/usr/source/config', // container folder
+      to: '/path/to/config/folder', // host folder
+      readOnly: true // optional, default is false
+    }
+  ]
+})
+
 await ssh.disconnect()
 ```

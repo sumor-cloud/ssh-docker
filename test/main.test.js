@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeAll, afterAll } from '@jest/globals'
-import SSH from './SSH.js'
-import server from './server.js'
+import SSH from './utils/SSH.js'
+import server from './utils/server.js'
 import stringifyRunCmd from '../src/stringifyRunCmd.js'
 
 const sourceFolder = `${process.cwd()}/test/assets/app`
@@ -84,9 +84,10 @@ describe('main', () => {
 
     const cmd1 = stringifyRunCmd({
       image: 'test',
-      version: '1.0.0'
+      version: '1.0.0',
+      background: false
     })
-    expect(cmd1).toStrictEqual('docker run -itd --restart=on-failure -d test:1.0.0')
+    expect(cmd1).toStrictEqual('docker run -it -d test:1.0.0')
 
     const cmd2 = stringifyRunCmd({
       image: 'test',

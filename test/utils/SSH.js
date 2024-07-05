@@ -1,5 +1,5 @@
 import SSHBasic from '@sumor/ssh-tools'
-import docker from '../src/index.js'
+import docker from '../../src/index.js'
 
 class SSH extends SSHBasic {
   constructor(config) {

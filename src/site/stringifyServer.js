@@ -7,8 +7,8 @@ export default options => {
   servers.forEach(server => {
     const result = ['server']
     const host = server.host
-    const port = server.port
-    const hostString = port ? `${host}:${port}` : host
+    const port = server.port || 443
+    const hostString = `${host}:${port}`
     result.push(hostString)
 
     const weight = server.weight

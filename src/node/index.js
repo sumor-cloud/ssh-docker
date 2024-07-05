@@ -1,12 +1,9 @@
-const randomName = () => {
-  const prefix = 'sumor-docker-build-'
-  return prefix + Math.random().toString(36).substring(7)
-}
-export default (ssh, docker) => {
-  const build = async (remoteFolder, options) => {
-    options = options || {}
+import retryMethod from '../utils/retryMethod.js'
+import randomName from '../utils/randomName.js'
 
-    const dockerId = randomName()
+export default (ssh, docker) => {
+  const build = async remoteFolder => {
+    const dockerId = randomName('sumor-docker-build-')
 
     await docker.run({
       name: dockerId,
@@ -28,9 +25,7 @@ export default (ssh, docker) => {
   }
 
   const run = async (dockerId, remoteFolder, options) => {
-    options = options || {}
-
-    const port = options.port || 3000
+    const port = options.port
 
     await docker.run({
       name: dockerId,
@@ -51,31 +46,11 @@ export default (ssh, docker) => {
       cmd: 'cd /usr/source && npm start'
     })
 
-    let retry = 0
-    const maxRetry = 60 * 10 // 60 seconds
-
-    const ping = async () => {
-      let pingError
-      try {
-        await ssh.exec(`curl --insecure https://localhost:${port}`, {
-          cwd: '/'
-        })
-      } catch (e) {
-        pingError = e
-      }
-      if (pingError) {
-        if (retry < maxRetry) {
-          retry++
-          await new Promise(resolve => {
-            setTimeout(resolve, 100)
-          })
-          await ping()
-        } else {
-          throw pingError
-        }
-      }
-    }
-
+    const ping = retryMethod(async () => {
+      await ssh.exec(`curl --insecure https://localhost:${port}`, {
+        cwd: '/'
+      })
+    })
     await ping()
   }
 
