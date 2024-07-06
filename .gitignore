@@ -9,7 +9,7 @@ tmp/
 output/
 
 # runtime config
-ssl/
+/ssl/
 
 # test config
 test/config
