@@ -10,10 +10,13 @@ describe('Utils related', () => {
       if (retry1 < 3) {
         retry1++
         throw new Error('test')
+      } else {
+        return retry1
       }
     })
-    await retryMethod1()
+    const result = await retryMethod1()
     expect(retry1).toBe(3)
+    expect(result).toBe(3)
 
     const startTime = Date.now()
     let retry2 = 0

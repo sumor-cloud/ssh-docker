@@ -5,9 +5,10 @@ export default (callback, options) => {
   let retry = 0
 
   const ping = async () => {
+    let response
     let pingError
     try {
-      await callback()
+      response = await callback()
     } catch (e) {
       pingError = e
     }
@@ -17,10 +18,12 @@ export default (callback, options) => {
         await new Promise(resolve => {
           setTimeout(resolve, options.interval)
         })
-        await ping()
+        return await ping()
       } else {
         throw pingError
       }
+    } else {
+      return response
     }
   }
 
