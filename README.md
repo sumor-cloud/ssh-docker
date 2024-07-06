@@ -133,5 +133,33 @@ const logs = await ssh.docker.runNginx({
   ]
 })
 
+// update Nginx config
+await ssh.docker.updateNginx(dockerId)
+
+// run site
+await ssh.docker.runSite({
+      workerProcesses: 2,
+      workerConnections: 2048,
+      port: 30100,
+      domains: [
+        {
+          domain: 'dev.example.com',
+          servers: [
+            {
+              host: 'dev.example.com',
+              port: 30001,
+              maxFails: 3,
+              maxConns: 5
+            },
+            {
+              host: 'dev.example.com',
+              port: 30002,
+              weight: 1
+            }
+          ]
+        }
+      ]
+    })
+
 await ssh.disconnect()
 ```

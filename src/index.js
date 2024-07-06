@@ -2,6 +2,7 @@ import dockerCmd from './dockerCmd.js'
 import stringifyRunCmd from './stringifyRunCmd.js'
 import node from './node/index.js'
 import nginx from './nginx/index.js'
+import site from './site/index.js'
 
 export default ssh => {
   const apis = {
@@ -76,6 +77,7 @@ export default ssh => {
 
   node(ssh, apis)
   nginx(ssh, apis)
+  site(ssh, apis)
 
   return apis
 }

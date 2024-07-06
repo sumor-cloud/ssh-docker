@@ -2,6 +2,7 @@ import { describe, expect, it, beforeAll, afterAll } from '@jest/globals'
 import SSH from './utils/SSH.js'
 import server from './utils/server.js'
 import runNginxConfig from '../src/nginx/runNginxConfig.js'
+import ping from './utils/ping.js'
 
 let port
 let remoteFolder
@@ -92,24 +93,10 @@ http {
         const containers = await ssh.docker.containers()
         console.log(containers)
 
-        let response11
-        try {
-          response11 = await ssh.exec(`curl http://localhost:${port}/html1/`, {
-            cwd: '/'
-          })
-        } catch (e) {
-          console.log(e)
-        }
+        let response11 = await ping(ssh, `http://localhost:${port}/html1/`)
         expect(response11).toBe(demoPage1)
 
-        let response12
-        try {
-          response12 = await ssh.exec(`curl http://localhost:${port}/html2/`, {
-            cwd: '/'
-          })
-        } catch (e) {
-          console.log(e)
-        }
+        let response12 = await ping(ssh, `http://localhost:${port}/html2/`)
         expect(response12.indexOf('404')).toBeGreaterThan(0)
 
         // very simple nginx config only with demo page
@@ -134,24 +121,10 @@ http {
         await ssh.file.writeFile(`${remoteFolder}/nginx.conf`, nginxConfig2)
         await ssh.docker.updateNginx(dockerId)
 
-        let response21
-        try {
-          response21 = await ssh.exec(`curl http://localhost:${port}/html1/`, {
-            cwd: '/'
-          })
-        } catch (e) {
-          console.log(e)
-        }
+        let response21 = await ping(ssh, `http://localhost:${port}/html1/`)
         expect(response21).toBe(demoPage1)
 
-        let response22
-        try {
-          response22 = await ssh.exec(`curl http://localhost:${port}/html2/`, {
-            cwd: '/'
-          })
-        } catch (e) {
-          console.log(e)
-        }
+        let response22 = await ping(ssh, `http://localhost:${port}/html2/`)
         expect(response22).toBe(demoPage2)
 
         await ssh.disconnect()

@@ -1,24 +1,19 @@
-import stringifyConf from './stringifyConf.js'
-import stringifyHttp from './stringifyHttp.js'
-import stringifyServer from './stringifyServer.js'
+import stringify from './stringify/index.js'
+import ssl from './ssl/index.js'
 
-export default options => {
-  options = options || {}
-  const domains = options.domains || []
-  const servers = []
-  domains.forEach(domain => {
-    const result = stringifyServer(domain)
-    servers.push(result)
-  })
+export default (ssh, docker) => {
+  const run = async options => {
+    const nginxConfig = stringify(options)
+    
+    const port = options.port || 443;
+    const remotePath = `/usr/sites/site_${port}`;
 
-  const httpContent = servers.join('\n')
-  const httpString = stringifyHttp({
-    content: httpContent
-  })
+    await ssh.file.ensureDir(remotePath);
+    await ssh.file.writeFile(`${remotePath}/nginx.conf`, nginxConfig);
+    const sslPath = await ssl(options);
+    await ssh.file.putFolder(sslPath, `${remotePath}/ssl`);
+    
+  }
 
-  return stringifyConf({
-    workerProcesses: options.workerProcesses,
-    workerConnections: options.workerConnections,
-    content: httpString
-  })
+  docker.runSite = run
 }

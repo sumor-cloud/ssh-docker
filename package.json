@@ -13,6 +13,10 @@
     "ssh",
     "docker"
   ],
+  "dependencies": {
+    "fs-extra": "^11.2.0",
+    "selfsigned": "^2.4.1"
+  },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
     "@sumor/ssh-tools": "^1.0.6",
@@ -42,6 +46,7 @@
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testMatch='**/test/**/*.test.js'",
     "test-utils": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testMatch='**/test/**/utils.test.js'",
     "test-node": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testMatch='**/test/**/node.test.js'",
+    "test-site-utils": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testMatch='**/test/site/*.test.js'",
     "test-site": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testMatch='**/test/**/site.test.js'",
     "test-nginx": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testMatch='**/test/**/nginx.test.js'",
     "coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --testMatch='**/test/**/*.test.js'",

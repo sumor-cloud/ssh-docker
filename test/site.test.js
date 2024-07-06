@@ -1,75 +1,166 @@
-import { describe, expect, it } from '@jest/globals'
+import { describe, expect, it, beforeAll, afterAll } from '@jest/globals'
+import SSH from './utils/SSH.js'
+import server from './utils/server.js'
+import generateSSL from '../src/site/ssl/generateSSL.js'
+import ping from './utils/ping.js'
+import os from 'os'
+import fse from 'fs-extra'
 
-import stringifyConf from '../src/site/stringifyConf.js'
-import stringifyHttp from '../src/site/stringifyHttp.js'
-import stringifyServer from '../src/site/stringifyServer.js'
-import stringify from '../src/site/index.js'
+let port, port1, port2
+let remoteFolder
+let dockerId
+const domain = server.domain
 
-import loadNginxFiles from './utils/loadNginxFiles.js'
-const nginxFiles = await loadNginxFiles()
+const localSslPath = `${os.tmpdir()}/sumor-ssh-docker-test-${Date.now()}/ssl`
 
 describe('Site related', () => {
-  it('stringify nginx config', () => {
-    const result1 = stringifyConf()
-    expect(result1).toBe(nginxFiles.stringifyConfig1)
-    const result2 = stringifyConf({
-      workerProcesses: 2,
-      workerConnections: 2048,
-      content: `http {\n\n}`
-    })
-    expect(result2).toBe(nginxFiles.stringifyConfig2)
-  })
-  it('stringify nginx http', () => {
-    const result1 = stringifyHttp()
-    expect(result1).toBe(nginxFiles.stringifyHttp1)
-    const result2 = stringifyHttp({
-      content: `server {\n	\n}`
-    })
-    expect(result2).toBe(nginxFiles.stringifyHttp2)
-  })
-  it('stringify nginx server', () => {
-    const result1 = stringifyServer()
-    expect(result1).toBe(nginxFiles.stringifyServer1)
-    const result2 = stringifyServer({
-      domain: 'dev.example.com',
-      servers: [
-        {
-          host: 'dev1.example.com'
-        },
-        {
-          host: 'dev2.example.com',
-          port: 30002,
-          weight: 1,
-          maxFails: 3,
-          maxConns: 5
+  beforeAll(
+    async () => {
+      await fse.ensureDir(localSslPath)
+      const ssh = new SSH(server)
+      await ssh.connect()
+      port = await ssh.port.getPort()
+      port1 = await ssh.port.getPort()
+      port2 = await ssh.port.getPort()
+      dockerId = `sumor_site_${port}`
+      remoteFolder = `/tmp/sumor-ssh-docker-test/${dockerId}`
+      await ssh.file.ensureDir(remoteFolder)
+
+      await ssh.disconnect()
+    },
+    5 * 60 * 1000
+  )
+  afterAll(
+    async () => {
+      await fse.remove(localSslPath)
+      const ssh = new SSH(server)
+      await ssh.connect()
+      await ssh.docker.remove(dockerId)
+      await ssh.docker.remove(dockerId + '-demo1')
+      await ssh.docker.remove(dockerId + '-demo2')
+      await ssh.file.remove(remoteFolder)
+      await ssh.disconnect()
+    },
+    5 * 60 * 1000
+  )
+  it(
+    'run site',
+    async () => {
+      const ssh = new SSH(server)
+      await ssh.connect()
+
+      try {
+        await generateSSL('localhost', localSslPath)
+
+        // prepare demo site
+        const runDemo = async ({ name, port }) => {
+          const path = `${remoteFolder}/${name}`
+          const remoteSSLPath = `${path}/ssl`
+          await ssh.file.ensureDir(`${path}/html`)
+          await ssh.file.writeFile(`${path}/html/index.html`, name)
+          await ssh.file.putFolder(localSslPath + '/localhost', remoteSSLPath)
+          const nginxConfig = `user  root;
+worker_processes  1;
+events {
+    worker_connections  1024;
+}
+http {
+    server {
+	      listen 443 ssl;
+        ssl_certificate_key ssl/domain.key;
+        ssl_certificate ssl/domain.crt;
+        ssl_session_timeout 5m;
+        ssl_ciphers EECDH+AESGCM:EECDH+CHACHA20:ECDH+AESGCM:ECDH+AES256:DH+AESGCM:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:!aNULL:!MD5:!DSS;
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_prefer_server_ciphers on;
+        location /html {
+            root /etc/nginx;
+            index index.html;
         }
-      ]
-    })
-    expect(result2).toBe(nginxFiles.stringifyServer2)
-  })
-  it('stringify entry', () => {
-    const result1 = stringify()
-    expect(result1).toBe(nginxFiles.stringifyEntry1)
-    const result2 = stringify({
-      workerProcesses: 2,
-      workerConnections: 2048,
-      domains: [
-        {
-          domain: 'dev.example.com',
-          servers: [
+    }
+}`
+          await ssh.file.writeFile(`${path}/nginx.conf`, nginxConfig)
+          await ssh.docker.runNginx({
+            name: dockerId + '-' + name,
+            ports: [
+              {
+                from: 443,
+                to: port
+              }
+            ],
+            bindings: [
+              {
+                from: '/etc/nginx/nginx.conf',
+                to: `${path}/nginx.conf`
+              },
+              {
+                from: '/etc/nginx/html',
+                to: `${path}/html`
+              },
+              {
+                from: '/etc/nginx/ssl',
+                to: `${path}/ssl`
+              }
+            ]
+          })
+
+          // check demo server availability
+          const response = await ping(ssh, `https://${domain}:${port}/html/`)
+          expect(response).toBe(name)
+        }
+        await runDemo({
+          name: 'demo1',
+          port: port1
+        })
+        await runDemo({
+          name: 'demo2',
+          port: port2
+        })
+        const containers = await ssh.docker.containers()
+        console.log(containers)
+
+        const siteConfig = {
+          workerProcesses: 2,
+          workerConnections: 2048,
+          port,
+          domains: [
             {
-              host: 'dev.example.com',
-              port: 30001
-            },
-            {
-              host: 'dev.example.com',
-              port: 30002,
-              weight: 1
+              domain,
+              servers: [
+                {
+                  host: domain,
+                  port: port1
+                },
+                {
+                  host: domain,
+                  port: port2
+                }
+              ]
             }
           ]
         }
-      ]
-    })
-    expect(result2).toBe(nginxFiles.stringifyEntry2)
-  })
+
+        await ssh.docker.runSite(siteConfig)
+
+        const results = []
+        for (let i = 0; i < 10; i++) {
+          const response = await ping(ssh, `https://${domain}:${port}/html/`)
+          results.push(response)
+        }
+        expect(results).toContain('demo1')
+        expect(results).toContain('demo2')
+
+        await ssh.disconnect()
+      } catch (e) {
+        await ssh.disconnect()
+        throw e
+      }
+    },
+    5 * 60 * 1000
+  )
 })
+
+/*
+docker rm -f nginx
+docker run -it -v ./nginx.conf:/etc/nginx/nginx.conf -v ./html:/etc/nginx/html -v ./ssl:/etc/nginx/ssl -p 30100:443 --name nginx nginx
+*/
