@@ -39,10 +39,10 @@ describe('Site related', () => {
       const ssh = new SSH(server)
       await ssh.connect()
       await ssh.docker.remove(dockerId)
-      await ssh.docker.remove(dockerId + '-demo1')
-      await ssh.docker.remove(dockerId + '-demo2')
-      await ssh.docker.remove(dockerId + '-demo3')
-      await ssh.docker.remove(dockerId + '-demo4')
+      await ssh.docker.remove(dockerId + '_demo1')
+      await ssh.docker.remove(dockerId + '_demo2')
+      await ssh.docker.remove(dockerId + '_demo3')
+      await ssh.docker.remove(dockerId + '_demo4')
       await ssh.file.remove(remoteFolder)
       await ssh.disconnect()
     },
@@ -86,7 +86,7 @@ http {
 }`
           await ssh.file.writeFile(`${path}/nginx.conf`, nginxConfig)
           await ssh.docker.runNginx({
-            name: dockerId + '-' + name,
+            name: dockerId + '_' + name,
             ports: [
               {
                 from: 443,
