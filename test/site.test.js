@@ -1,15 +1,16 @@
 import { describe, expect, it, beforeAll, afterAll } from '@jest/globals'
-import SSH from './utils/SSH.js'
-import server from './utils/server.js'
-import generateSSL from '../src/site/ssl/generateSSL.js'
-import ping from './utils/ping.js'
+import SSH from './test-utils/SSH.js'
+import server from './test-utils/server.js'
+import generateSSL from '../src/ssl/generateSSL.js'
+import ping from './test-utils/ping.js'
 import os from 'os'
 import fse from 'fs-extra'
 
-let port, port1, port2
+let port, port1, port2, port3, port4
 let remoteFolder
 let dockerId
 const domain = server.domain
+const alias = server.alias
 
 const localSslPath = `${os.tmpdir()}/sumor-ssh-docker-test-${Date.now()}/ssl`
 
@@ -22,6 +23,8 @@ describe('Site related', () => {
       port = await ssh.port.getPort()
       port1 = await ssh.port.getPort()
       port2 = await ssh.port.getPort()
+      port3 = await ssh.port.getPort()
+      port4 = await ssh.port.getPort()
       dockerId = `sumor_site_${port}`
       remoteFolder = `/tmp/sumor-ssh-docker-test/${dockerId}`
       await ssh.file.ensureDir(remoteFolder)
@@ -38,6 +41,8 @@ describe('Site related', () => {
       await ssh.docker.remove(dockerId)
       await ssh.docker.remove(dockerId + '-demo1')
       await ssh.docker.remove(dockerId + '-demo2')
+      await ssh.docker.remove(dockerId + '-demo3')
+      await ssh.docker.remove(dockerId + '-demo4')
       await ssh.file.remove(remoteFolder)
       await ssh.disconnect()
     },
@@ -50,7 +55,7 @@ describe('Site related', () => {
       await ssh.connect()
 
       try {
-        await generateSSL('localhost', localSslPath)
+        await generateSSL('localhost', localSslPath + '/localhost')
 
         // prepare demo site
         const runDemo = async ({ name, port }) => {
@@ -116,6 +121,14 @@ http {
           name: 'demo2',
           port: port2
         })
+        await runDemo({
+          name: 'demo3',
+          port: port3
+        })
+        await runDemo({
+          name: 'demo4',
+          port: port4
+        })
         const containers = await ssh.docker.containers()
         console.log(containers)
 
@@ -136,6 +149,19 @@ http {
                   port: port2
                 }
               ]
+            },
+            {
+              domain: alias,
+              servers: [
+                {
+                  host: alias,
+                  port: port3
+                },
+                {
+                  host: alias,
+                  port: port4
+                }
+              ]
             }
           ]
         }
@@ -149,6 +175,14 @@ http {
         }
         expect(results).toContain('demo1')
         expect(results).toContain('demo2')
+
+        const results2 = []
+        for (let i = 0; i < 10; i++) {
+          const response = await ping(ssh, `https://${alias}:${port}/html/`)
+          results2.push(response)
+        }
+        expect(results2).toContain('demo3')
+        expect(results2).toContain('demo4')
 
         await ssh.disconnect()
       } catch (e) {

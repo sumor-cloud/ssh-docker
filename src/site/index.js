@@ -1,5 +1,5 @@
 import stringify from './stringify/index.js'
-import ssl from './ssl/index.js'
+import loadSSLs from '../ssl/loadSSLs.js'
 
 export default (ssh, docker) => {
   const run = async options => {
@@ -10,7 +10,7 @@ export default (ssh, docker) => {
 
     await ssh.file.ensureDir(remotePath)
     await ssh.file.writeFile(`${remotePath}/nginx.conf`, nginxConfig)
-    const sslPath = await ssl(options)
+    const sslPath = await loadSSLs(options)
     await ssh.file.putFolder(sslPath, `${remotePath}/ssl`)
 
     const dockerId = `sumor_site_${port}`
