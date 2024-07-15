@@ -5,7 +5,7 @@ import stringifyHttp from '../../src/site/stringify/stringifyHttp.js'
 import stringifyServer from '../../src/site/stringify/stringifyServer.js'
 import stringify from '../../src/site/stringify/index.js'
 
-import loadNginxFiles from '../utils/loadNginxFiles.js'
+import loadNginxFiles from '../test-utils/loadNginxFiles.js'
 const nginxFiles = await loadNginxFiles()
 
 describe('Site Stringify', () => {

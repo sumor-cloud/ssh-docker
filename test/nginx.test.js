@@ -1,8 +1,8 @@
 import { describe, expect, it, beforeAll, afterAll } from '@jest/globals'
-import SSH from './utils/SSH.js'
-import server from './utils/server.js'
+import SSH from './test-utils/SSH.js'
+import server from './test-utils/server.js'
 import runNginxConfig from '../src/nginx/runNginxConfig.js'
-import ping from './utils/ping.js'
+import ping from './test-utils/ping.js'
 
 let port
 let remoteFolder
