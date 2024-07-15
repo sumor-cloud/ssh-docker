@@ -17,7 +17,19 @@ export default (ssh, docker) => {
       ]
     })
 
-    const logs = await docker.exec(dockerId, 'cd /usr/source && npm install && npm run build')
+    let logs = ''
+    const installLogs = await docker.exec(dockerId, 'cd /usr/source && npm install')
+    logs += installLogs
+
+    // check if there is a build script
+    const packageJson = await ssh.exec('cat package.json', {
+      cwd: remoteFolder
+    })
+    const packageJsonParsed = JSON.parse(packageJson)
+    if (packageJsonParsed.scripts && packageJsonParsed.scripts.build) {
+      const buildLogs = await docker.exec(dockerId, 'cd /usr/source && npm run build')
+      logs += buildLogs
+    }
 
     await docker.remove(dockerId)
 
