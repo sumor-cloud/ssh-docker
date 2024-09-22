@@ -24,6 +24,12 @@ export default ssh => {
       } catch (e) {
         if (e.message.indexOf('No such container') < 0) {
           throw e
+        } else {
+          // retry to remove once
+          await new Promise(resolve => {
+            setTimeout(resolve, 5 * 1000)
+          })
+          return await this.cmd(`docker rm -f ${id}`)
         }
       }
     },

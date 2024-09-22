@@ -87,7 +87,7 @@ describe('main', () => {
       version: '1.0.0',
       background: false
     })
-    expect(cmd1).toStrictEqual('docker run -it -d test:1.0.0')
+    expect(cmd1).toStrictEqual('docker run -it --init -d test:1.0.0')
 
     const cmd2 = stringifyRunCmd({
       image: 'test',
@@ -108,7 +108,7 @@ describe('main', () => {
       name: 'test'
     })
     expect(cmd2).toStrictEqual(
-      'docker run -itd --restart=on-failure -v /usr/demo/config:/usr/source/config:ro -v /usr/demo/logs:/usr/source/logs:ro -p 30123:443 --name test -d test:1.0.0'
+      'docker run -itd --restart=on-failure --init -v /usr/demo/config:/usr/source/config:ro -v /usr/demo/logs:/usr/source/logs:ro -p 30123:443 --name test -d test:1.0.0'
     )
   })
   it(

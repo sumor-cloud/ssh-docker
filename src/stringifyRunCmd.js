@@ -7,6 +7,7 @@ export default options => {
   } else {
     dockerRunStr.push('-it')
   }
+  dockerRunStr.push('--init')
   if (bindings) {
     for (const folder of bindings) {
       const readOnly = folder.readOnly ? ':ro' : ''
